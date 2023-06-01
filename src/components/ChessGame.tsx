@@ -6,14 +6,18 @@ import useWebSocket from "../hooks/useWebSocket";
 interface Move {
   from: string;
   to: string;
+  white: boolean;
 }
 
-const ChessGame: React.FC = () => {
+interface Props {
+  roomID: string;
+}
+
+const ChessGame: React.FC<Props> = ({ roomID }) => {
   const [chess] = React.useState<any>(
     new Chess("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
   );
-
-  const sendMessage = useWebSocket("ws://localhost:3000/ws/100");
+  const sendMessage = useWebSocket("ws://localhost:3000/ws/" + roomID);
 
   const [fen, setFen] = React.useState(chess.fen());
 
@@ -28,6 +32,7 @@ const ChessGame: React.FC = () => {
             const computerMove: Move = {
               from: moves[computerMoveIndex].from,
               to: moves[computerMoveIndex].to,
+              white: false,
             };
             chess.move(computerMove);
             sendMessage(computerMove);
@@ -40,8 +45,10 @@ const ChessGame: React.FC = () => {
       return;
     }
   };
+
   return (
     <div className="flex-center">
+      <div>Room ID: {roomID}</div>
       <Chessboard
         width={400}
         position={fen}
@@ -49,6 +56,7 @@ const ChessGame: React.FC = () => {
           handleMove({
             from: move.sourceSquare,
             to: move.targetSquare,
+            white: true,
           })
         }
       />

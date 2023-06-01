@@ -1,13 +1,16 @@
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
-import ChessGame from "./components/ChessGame";
-import WebSocketTest from "./components/WebSocket";
+import HomePage from "./pages/HomePage";
+import ChessRoom from "./pages/ChessRoom";
 
 const App: React.FC = () => {
   return (
-    <div className="flex-center">
-      <ChessGame />
-      <WebSocketTest />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/:id" element={<ChessRoom />} />
+        <Route path="/" element={<HomePage />} />
+      </Routes>
+    </Router>
   );
 };
 

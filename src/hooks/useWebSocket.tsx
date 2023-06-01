@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 interface WebSocketOptions {
   onOpen?: () => void;
   onClose?: () => void;
+  onMessage?: (message: string) => void;
 }
 
 const useWebSocket = (url: string, options?: WebSocketOptions) => {
@@ -14,6 +15,12 @@ const useWebSocket = (url: string, options?: WebSocketOptions) => {
 
     socket.addEventListener("open", () => {
       console.log("WebSocket connection established");
+      if (
+        socketRef.current &&
+        socketRef.current.readyState === WebSocket.OPEN
+      ) {
+        socketRef.current.send("connected");
+      }
       if (options?.onOpen) {
         options.onOpen();
       }
@@ -26,10 +33,19 @@ const useWebSocket = (url: string, options?: WebSocketOptions) => {
       }
     });
 
+    socket.addEventListener("message", (event) => {
+      console.log("Received message from server:", event.data);
+      if (options?.onMessage) {
+        options.onMessage(event.data);
+      }
+    });
+
     return () => {
-      socket.close();
+      if (socketRef.current) {
+        socketRef.current.close();
+      }
     };
-  }, [url, options?.onOpen, options?.onClose]);
+  }, [url, options?.onOpen, options?.onClose, options?.onMessage]);
 
   const sendMessage = (message: object) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
